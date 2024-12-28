@@ -1,0 +1,111 @@
+CREATE VIEW OrdersView AS
+SELECT OrderID, Quantity, TotalCost FROM Orders
+WHERE Quantity > 2;
+
+
+
+SELECT c.CustomerID, c.CustomerName, o.OrderID, o.TotalCost, m.MenuName, mi.CourseName, mi.StarterName FROM Customers c INNER JOIN Orders o ON c.CustomerID = o.CustomerID INNER JOIN Menus m ON o.MenuID = m.MenuID INNER JOIN MenuItems mi ON m.MenuID = mi.MenuID WHERE o.TotalCost > 150 ORDER BY o.TotalCost ASC;
+SELECT MenuName FROM Menus WHERE MenuID = ANY (SELECT MenuID FROM Orders WHERE Quantity > 0);
+
+
+
+CREATE PROCEDURE GetMaxQuantity()
+SELECT 	MAX(Quantity) FROM Orders;
+
+
+
+
+PREPARE GetOrderDetail FROM ’SELECT OrderID, Quantity, TotalCost FROM Orders WHERE CustomerID = ?’;
+SET @id = 1;
+EXECUTE GetOrderDetail USING @id
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE CancelOrder(IN x INT)
+BEGIN
+DELETE FROM Orders WHERE OrderID = x;
+END
+//
+DELIMITER ;
+
+
+
+
+INSERT INTO Bookings (BookingID, BookingDate, TableNumber, CustomerID) VALUES (1, '2022-10-10', 5, 1), (2, '2022-11-12', 3, 3), (3, '2022-10-11', 2, 2), (4, '2022-10-13', 2, 1);
+
+
+
+
+
+DELIMITER // CREATE PROCEDURE CheckBooking(IN bookingdate DATE, IN tablenumber INT) BEGIN DECLARE booking_exists INT; -- Check if the table is booked SELECT COUNT(*) INTO booking_exists FROM Bookings WHERE BookingDate = bookingdate AND TableNumber = tablenumber; -- Return the booking status IF booking_exists > 0 THEN SELECT 'Table is already booked.' AS BookingStatus; ELSE SELECT 'Table is available.' AS BookingStatus; END IF; END /
+
+
+
+
+DELIMITER // CREATE PROCEDURE AddValidBooking(IN bookingdate DATE, IN tablenumber INT, IN customerid INT) BEGIN DECLARE booking_exists INT; -- Start the transaction START TRANSACTION; -- Check if the table is already booked on the given date SELECT COUNT(*) INTO booking_exists FROM Bookings WHERE BookingDate = bookingdate AND TableNumber = tablenumber; -- Conditional logic to handle booking IF booking_exists > 0 THEN -- Rollback transaction if the table is already booked ROLLBACK; SELECT 'Table is already booked. Booking has been cancelled.' AS BookingStatus; ELSE -- Insert the booking record if the table is available INSERT INTO Bookings (BookingDate, TableNumber, CustomerID) VALUES (bookingdate, tablenumber, customerid); -- Commit the transaction COMMIT; SELECT 'Booking has been successfully added.' AS BookingStatus; END IF; END //
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE AddBooking(IN bookingid INT, IN bookingdate INT, IN tablenumber INT, IN customerid INT)
+BEGIN 
+INSERT INTO Bookings (BookingID, BookingDate, TableNumber, CustomerID) VALUES (bookingid, bookingdate, tablenumber, customerid)
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE UpdateBooking(IN bookingid INT, IN bookingdate INT)
+BEGIN
+Update Bookings SET BookingDate = bookingdate WHERE BookingID = bookingid;
+END
+//
+DELIMITER ;
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE CancelBooking(IN bookingid INT)
+BEGIN
+DELETE FROM Bookings WHERE BookingID = bookingid;
+END
+//
+DELIMITER ;
+
+
+
+
+import mysql.connector as connector
+
+connection=connector.connect(user="root",password="mysql")
+
+cursor = connection.cursor()
+
+cursor.execute("USE db_capstone_project_server")
+
+show_tables_query = "SHOW tables" 
+cursor.execute(show_tables_query)
+
+results = cursor.fetchall()
+
+for result in results:
+	print(result)
+
+query = SELECT Customers.CustomerName, Customers.Email, Customers.Phone, Orders.TotalCost FROM Orders INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID WHERE Orders.TotalCost > 60;
+
+cursor.execute(query)
+
+results2 = cursor.fetchall()
+
+for result in results2:
+	print(result)
+
+
+
+

@@ -1,0 +1,194 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+-- -----------------------------------------------------
+-- Schema littlelemondb
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema littlelemondb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `littlelemondb` DEFAULT CHARACTER SET utf8mb3 ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `mydb`.``
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`` (
+)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`timestamps`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`timestamps` (
+  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` TIMESTAMP NULL);
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`user` (
+  `username` VARCHAR(16) NOT NULL,
+  `email` VARCHAR(255) NULL,
+  `password` VARCHAR(32) NOT NULL,
+  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP);
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`category`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`category` (
+  `category_id` INT NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`category_id`));
+
+USE `littlelemondb` ;
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Customers`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Customers` (
+  `CustomerID` INT NOT NULL,
+  `CustomerName` VARCHAR(45) NULL,
+  `Email` VARCHAR(45) NULL,
+  `Phone` VARCHAR(45) NULL,
+  PRIMARY KEY (`CustomerID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Bookings`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Bookings` (
+  `BookingID` INT NOT NULL,
+  `BookingDate` DATE NULL,
+  `TableNumber` INT NULL,
+  `CustomerID` INT NULL,
+  PRIMARY KEY (`BookingID`),
+  INDEX `customer_id_fk_idx` (`CustomerID` ASC) VISIBLE,
+  CONSTRAINT `customer_id_fk`
+    FOREIGN KEY (`CustomerID`)
+    REFERENCES `littlelemondb`.`Customers` (`CustomerID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Menus`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Menus` (
+  `MenuID` INT NOT NULL,
+  `MenuName` VARCHAR(45) NULL,
+  `Cuisine` VARCHAR(45) NULL,
+  PRIMARY KEY (`MenuID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Delivery_status`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Delivery_status` (
+  `OrderID` INT NOT NULL,
+  `DeliveryDate` DATE NULL,
+  `Status` VARCHAR(45) NULL,
+  PRIMARY KEY (`OrderID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Staff`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Staff` (
+  `StaffID` INT NOT NULL,
+  `Role` VARCHAR(45) NULL,
+  `Salary` DECIMAL(10,0) NULL,
+  PRIMARY KEY (`StaffID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Orders`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Orders` (
+  `OrderID` INT NOT NULL,
+  `OrderDate` DATE NULL,
+  `Quantity` INT NULL,
+  `MenuID` INT NULL,
+  `CustomerID` INT NULL,
+  `TotalCost` DECIMAL(10,0) NULL,
+  `BookingID` INT NULL,
+  `StaffID` INT NULL,
+  PRIMARY KEY (`OrderID`),
+  INDEX `booking_id_fk_idx` (`BookingID` ASC) VISIBLE,
+  INDEX `staff_id_fk_idx` (`StaffID` ASC) VISIBLE,
+  INDEX `customer_id_fk_idx` (`CustomerID` ASC) VISIBLE,
+  INDEX `menu_id_fk_idx` (`MenuID` ASC) VISIBLE,
+  CONSTRAINT `booking_id_fk`
+    FOREIGN KEY (`BookingID`)
+    REFERENCES `littlelemondb`.`Bookings` (`BookingID`),
+  CONSTRAINT `staff_id_fk`
+    FOREIGN KEY (`StaffID`)
+    REFERENCES `littlelemondb`.`Staff` (`StaffID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `customer_id_fk`
+    FOREIGN KEY (`CustomerID`)
+    REFERENCES `littlelemondb`.`Customers` (`CustomerID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `order_id_fk`
+    FOREIGN KEY (`OrderID`)
+    REFERENCES `littlelemondb`.`Delivery_status` (`OrderID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `menu_id_fk`
+    FOREIGN KEY (`MenuID`)
+    REFERENCES `littlelemondb`.`Menus` (`MenuID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `littlelemondb`.`Menu_items`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `littlelemondb`.`Menu_items` (
+  `MenuItemsID` INT NOT NULL,
+  `MenuID` INT NULL,
+  `StarterName` VARCHAR(45) NULL,
+  `CourseName` VARCHAR(45) NULL,
+  `DesertName` VARCHAR(45) NULL,
+  PRIMARY KEY (`MenuItemsID`),
+  INDEX `menu_id_fk_idx` (`MenuID` ASC) VISIBLE,
+  CONSTRAINT `menu_id_fk`
+    FOREIGN KEY (`MenuID`)
+    REFERENCES `littlelemondb`.`Menus` (`MenuID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
